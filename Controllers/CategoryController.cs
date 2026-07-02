@@ -7,20 +7,25 @@ namespace Sales.API.Controllers
     [Route("api/categories")]
     public class CategoryController : ControllerBase
     {
-        private readonly List<CategoryEntity> _categories;
-
+        private static readonly List<CategoryEntity> _categories = new List<CategoryEntity>()
+        {
+            new CategoryEntity { Id = 1, Name = "Lácteos", Description = "" },
+            new CategoryEntity { Id = 2, Name = "Frutas", Description = "" },
+            new CategoryEntity { Id = 3, Name = "Higiene", Description = "" },
+            new CategoryEntity { Id = 4, Name = "Carnes", Description = "" }
+        };
         public CategoryController()
         {
-            _categories = new List<CategoryEntity>();
-            _categories.Add(new CategoryEntity{Id = 1, Name = "Lácteos", Description = ""});
-            _categories.Add(new CategoryEntity{Id = 2, Name = "Frutas", Description = ""});
-            _categories.Add(new CategoryEntity{Id = 3, Name = "Higiene", Description = ""});
-            _categories.Add(new CategoryEntity{Id = 4, Name = "Carnes", Description = ""});
-            // _categories.Add("Lácteos");
-            // _categories.Add("Carnes");
-            // _categories.Add("Verduras");
-            // _categories.Add("Frutas");
-            // _categories.Add("Higiene");
+            // _categories = new List<CategoryEntity>();
+            // _categories.Add(new CategoryEntity{Id = 1, Name = "Lácteos", Description = ""});
+            // _categories.Add(new CategoryEntity{Id = 2, Name = "Frutas", Description = ""});
+            // _categories.Add(new CategoryEntity{Id = 3, Name = "Higiene", Description = ""});
+            // _categories.Add(new CategoryEntity{Id = 4, Name = "Carnes", Description = ""});
+            // // _categories.Add("Lácteos");
+            // // _categories.Add("Carnes");
+            // // _categories.Add("Verduras");
+            // // _categories.Add("Frutas");
+            // // _categories.Add("Higiene");
         }
 
         [HttpGet]

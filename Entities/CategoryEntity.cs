@@ -1,14 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Sales.API.Entities
 {
-    public class CategoryEntity
+    [Table("categories")]
+    public class CategoryEntity : BaseEntity
     {
-        public int Id {get; set;}
+        [Column("name")]
         public string? Name{get; set;}
+        [Column("description")]
         public string? Description { get; set; }
-        //criao por
-        //fecha de criacion
-        // ultimo en editar
-        //fecha diultima edicion
-        
     }
 }

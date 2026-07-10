@@ -7,26 +7,18 @@ namespace Sales.API.Controllers
     [Route("api/categories")]
     public class CategoryController : ControllerBase
     {
-        private static readonly List<CategoryEntity> _categories = new List<CategoryEntity>()
+        private static readonly List<CategoryEntity> _categories = new List<CategoryEntity>
         {
-            new CategoryEntity { Id = 1, Name = "Lácteos", Description = "" },
-            new CategoryEntity { Id = 2, Name = "Frutas", Description = "" },
-            new CategoryEntity { Id = 3, Name = "Higiene", Description = "" },
-            new CategoryEntity { Id = 4, Name = "Carnes", Description = "" }
+            new CategoryEntity { Id = "1", Name = "Lácteos", Description = "" },
+            new CategoryEntity { Id = "2", Name = "Frutas", Description = "" },
+            new CategoryEntity { Id = "3", Name = "Higiene", Description = "" },
+            new CategoryEntity { Id = "4", Name = "Carnes", Description = "" }
         };
-        public CategoryController()
-        {
-            // _categories = new List<CategoryEntity>();
-            // _categories.Add(new CategoryEntity{Id = 1, Name = "Lácteos", Description = ""});
-            // _categories.Add(new CategoryEntity{Id = 2, Name = "Frutas", Description = ""});
-            // _categories.Add(new CategoryEntity{Id = 3, Name = "Higiene", Description = ""});
-            // _categories.Add(new CategoryEntity{Id = 4, Name = "Carnes", Description = ""});
-            // // _categories.Add("Lácteos");
-            // // _categories.Add("Carnes");
-            // // _categories.Add("Verduras");
-            // // _categories.Add("Frutas");
-            // // _categories.Add("Higiene");
-        }
+
+// ¡Y dejas el constructor completamente vacío!
+public CategoryController()
+{
+}
 
         [HttpGet]
         public IActionResult GetAll()
@@ -35,7 +27,7 @@ namespace Sales.API.Controllers
         }
 
         [HttpGet("{id}")] // GET: /categories/{id}
-        public IActionResult GetOne(int id)
+        public IActionResult GetOne(string id)
         {
             return Ok(_categories.FirstOrDefault(c => c.Id == id));
         }
@@ -48,7 +40,7 @@ namespace Sales.API.Controllers
             return Ok("Categoría creada");
         }
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] CategoryEntity category)
+        public IActionResult Put(string id, [FromBody] CategoryEntity category)
         {
             category.Id = id;// se iguala para no mandarlo(????????(En la vida real no se hace)
             var oldCategory = _categories.FirstOrDefault(c => c.Id == id);
@@ -62,7 +54,7 @@ namespace Sales.API.Controllers
         }
 
         [HttpDelete("{Id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
             var category = _categories.FirstOrDefault(c => c.Id == id);
             if(category != null)

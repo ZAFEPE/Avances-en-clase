@@ -1,4 +1,4 @@
-namespace Sales.API.Constanst
+namespace Sales.API.Constants
 {
     public static class HttpStatusCode
     {

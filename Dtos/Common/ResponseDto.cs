@@ -8,9 +8,7 @@ namespace Sales.API.Dtos.Common
         public int StatusCode { get; set; }
         public bool Status { get; set; }
         public string? Message { get; set; }
-        public T? Data { get; set; }
+        public T? Data { get; set; } // tipo generico (T?) Data tambien es generico
         
-
-
     }
 }

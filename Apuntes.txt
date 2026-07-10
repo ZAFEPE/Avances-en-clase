@@ -1,0 +1,182 @@
+1. BaseEntity // es lo que heredara categoryEntity para evitar ponerlo siempre
+2.CategoryEntity // es mas o menos como lo la estructura de lo que pediras en al base de datos?
+
+dotnet ef migrations add InitialCreate /// para crear el codigo de la tabal
+dotnet ef database update
+
+dotnet build /// para ver errores y warnings
+
+ESTO PARA QUE SI SE ACTUALICE EN BRUNO!!!!
+private static readonly List<CategoryEntity> _categories = new List<CategoryEntity>
+{
+    new CategoryEntity { Id = "1", Name = "Lácteos", Description = "" },
+    new CategoryEntity { Id = "2", Name = "Frutas", Description = "" },
+    new CategoryEntity { Id = "3", Name = "Higiene", Description = "" },
+    new CategoryEntity { Id = "4", Name = "Carnes", Description = "" }
+};
+
+// ¡Y dejas el constructor completamente vacío!
+public CategoryController()
+{ 
+   no tiene proposito sins inyeccion de dependencias
+}
+__________________________________________________________________________________________________________________________________________
+
+[Entidades] ──> [SalesDbContext] ──> [appsettings.json] ──> [Program.cs]
+
+[BaseEntity] (Propiedades comunes)
+      │
+      ▼ (Hereda a)
+[CategoryEntity] (Molde de la tabla)
+      │
+      ▼ (Se registra como DbSet en)
+[SalesDbContext] (El puente/ORM) <─── [appsettings.json] (Tiene la ruta "Sales.db")
+      │                                       │
+      └───────────────────┬───────────────────┘
+                          ▼ (Se inyectan y configuran en)
+                    [Program.cs] (El motor principal)
+                          │
+                          ▼ (Le inyecta el DbContext a)
+                    [CategoryService] (La lógica que guarda en SQLite)
+
+__________________________________________________________________________________________________________________________________________
+
+[ CLIENTE ]             [ CONTROLLER ]            [ SERVICE ]            [ DATABASE ]
+  (Bruno/Scalar)       (CategoryController)      (CategoryService)       (SalesDbContext)
+        │                       │                        │                      │
+        │─── 1. Envía JSON ────>│                        │                      │
+        │    (POST /categories) │                        │                      │
+        │                       │─── 2. Pasa el objeto ─>│                      │
+        │                       │                        │── 3. Asigna GUID y ─>│
+        │                       │                        │    fechas de aud.    │
+        │                       │                        │                      │
+        │                       │                        │── 4. Guarda en ─────>│ [ ARCHIVO .db ]
+        │                       │                        │    SQLite (_context) │ (Se crea en tu PC
+        │                       │                        │                      │  y se lee en LETOS)
+        │                       │                        │<─ 5. Confirma ok ────│
+        │                       │<── 6. Devuelve DTO ────│                      │
+        │                       │    (ResponseDto)       │                      │
+        │<── 7. Responde Status │                        │                      │
+        │    (200 OK / 201)     │                        │                      │                    
+        
+
+
+
+
+================================================================================
+          🚀 GUÍA DE SUPERVIVENCIA .NET 10 + EF CORE (SQLITE) 🚀
+================================================================================
+
+1. EL FLUJO DE CREACIÓN DE ARCHIVOS (De atrás hacia adelante)
+--------------------------------------------------------------------------------
+Si te piden agregar un módulo nuevo (ej. Productos), sigue estrictamente este orden:
+
+Paso 1: [Entities/BaseEntity.cs] -> Ya está creado, contiene los campos comunes (Id, auditorías).
+Paso 2: [Entities/XEntity.cs] -> El molde de la tabla. Hereda de `: BaseEntity`. Usa [Table("nombre_plural")].
+Paso 3: [DataBase/SalesDbContext.cs] -> Agrega la tabla usando: `public DbSet<XEntity> Plural { get; set; }`.
+Paso 4: [Terminal] -> Corre las migraciones para crear la tabla físicamente en tu archivo .db de SQLite.
+Paso 5: [Services/X/IXService.cs] -> Define la Interfaz (el contrato) con métodos asíncronos (Task<ResponseDto<...>>).
+Paso 6: [Services/X/XService.cs] -> Implementa la Interfaz. Inyecta el SalesDbContext por el constructor.
+Paso 7: [Controllers/XController.cs] -> El endpoint final que recibe datos y llama al Servicio.
+
+--------------------------------------------------------------------------------
+2. COMANDOS CLAVE DE TERMINAL (Entity Framework Core)
+--------------------------------------------------------------------------------
+
+🔹 Crear una Migración (Crear la "receta" de la tabla):
+   dotnet ef migrations add NombreDeLaMigracion
+   (Tip: El nombre puede ser algo como "AddProductsTable" o "UpdateCategories")
+
+🔹 Aplicar la Migración (Escribir físicamente en el archivo de SQLite):
+   dotnet ef database update
+   (Después de este comando, abre "Letos" para verificar que aparezca tu tabla)
+
+🔹 Levantar/Correr la API:
+   dotnet run
+
+--------------------------------------------------------------------------------
+3. CONCEPTOS TEÓRICOS FIJOS PARA DEFENDER EN EL EXAMEN
+--------------------------------------------------------------------------------
+
+💡 ¿Qué es Entity Framework Core?
+   Es un ORM (Object-Relational Mapper). Traduce nuestras clases de C# a sentencias
+   SQL que SQLite entiende de forma invisible, evitando que tiremos código SQL manual.
+
+💡 ¿Por qué las llaves del constructor de SalesDbContext están vacías {}?
+   Porque toda la configuración pesada de SQLite y las credenciales se le heredan 
+   automáticamente a la clase padre mediante la instrucción `: base(options)`.
+
+💡 ¿Qué significan 'get' y 'set'?
+   Es Encapsulamiento de POO. 'get' controla el permiso para LEER una propiedad,
+   y 'set' controla el permiso para MODIFICARLA.
+
+💡 ¿Qué es un DTO (Data Transfer Object)?
+   Es una caja de cartón de datos. Sirve para transportar información limpia entre 
+   Bruno y el Servidor. Protege las Entidades para no exponer campos internos ni 
+   auditorías a la web.
+
+💡 ¿Qué significa la '<T>' en tu ResponseDto<T>?
+   Representa un tipo Genérico. Permite que la estructura de respuesta sea reutilizable
+   para cualquier entidad del sistema (Categories, Products, etc.) sin repetir código.
+
+--------------------------------------------------------------------------------
+4. TIPS Y CONSEJOS ANTI-ERRORES (¡Cuidado aquí!)
+--------------------------------------------------------------------------------
+
+⚠️ Error de Git con archivos fantasmas:
+   Si ves carpetas 'obj/' o 'bin/' en tu terminal en verde listas para subir, 
+   no te asustes: no borres archivos de Windows. Revisa tu archivo `.gitignore` 
+   para asegurarte de que ignore estas carpetas de compilación.
+
+⚠️ Rutas absolutas en appsettings:
+   NUNCA pongas una ruta como "Data Source=C:/Users/Zahir/..." en la cadena de conexión.
+   Usa siempre "Data Source=Sales.db". Así se crea de forma local relativa y tu 
+   ingeniero lo podrá correr en su máquina al evaluarte.
+
+⚠️ No olvides el ASYNC / AWAIT:
+   Siempre que uses métodos de la base de datos como `AddAsync()` o `SaveChangesAsync()`,
+   debes anteponerles la palabra `await` y marcar tu función con la palabra `async`. 
+   Si se te olvida, .NET no compilará o te devolverá tareas incompletas.
+
+⚠️ Validar con Scalar antes de Bruno:
+   Gracias a `app.MapScalarApiReference()` en tu Program.cs, apenas enciendas la API, 
+   puedes entrar a la URL local en tu navegador para ver gráficamente tus endpoints. 
+   Úsalo para verificar que la estructura esté bien antes de programar las peticiones en Bruno.
+================================================================================
+ESTO PARA QUE SI SE ACTUALICE EN BRUNO!!!!
+private static readonly List<CategoryEntity> _categories = new List<CategoryEntity>
+{
+    new CategoryEntity { Id = "1", Name = "Lácteos", Description = "" },
+    new CategoryEntity { Id = "2", Name = "Frutas", Description = "" },
+    new CategoryEntity { Id = "3", Name = "Higiene", Description = "" },
+    new CategoryEntity { Id = "4", Name = "Carnes", Description = "" }
+};
+
+// ¡Y dejas el constructor completamente vacío!
+public CategoryController()
+{
+}
+
+El checklist mental para adaptarlo en 2 minutos:
+
+Borra la lista private readonly List<CategoryEntity> _categories;.
+
+Borra todo lo que esté adentro del constructor public CategoryController().
+
+Inyecta el servicio en ese constructor: public CategoryController(ICategoryService service).
+
+Agrega async y Task<IActionResult> a tus métodos (Post, GetAll, etc.).
+
+Cambia los retornos viejos por el dinámico: return StatusCode(response.StatusCode, response);.
+La Base: La entidad (ProductEntity o CategoryEntity) define cómo es la tabla en la base de datos.
+
+El Traductor: El SalesDbContext registra esa entidad con un DbSet para poder usarla en C#.
+
+El Contrato: La interfaz (ICategoryService) define qué métodos van a existir.
+
+El Cerebro: El servicio (CategoryService) procesa la lógica, transforma DTOs a Entidades,
+ escribe en SQLite con _context.SaveChangesAsync() y empaqueta todo en un ResponseDto.
+
+La Ventana al Mundo: El controlador (CategoryController) recibe la petición HTTP de Bruno, 
+se la pasa al servicio usando Inyección de Dependencias en su constructor y regresa la respuesta 
+con un código de estado dinámico (return StatusCode(...)).
